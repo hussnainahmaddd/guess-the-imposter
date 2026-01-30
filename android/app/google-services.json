@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "833469215639",
+    "project_id": "the-pretender-e30ec",
+    "storage_bucket": "the-pretender-e30ec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833469215639:android:bffe94e66605837a7e8ad2",
+        "android_client_info": {
+          "package_name": "com.find.impostor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcv9EmwIkD-faLLeqCod8_1y8_qEpH-w0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
