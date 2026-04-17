@@ -5,6 +5,7 @@ import '../data/themes.dart';
 import '../theme/app_theme.dart';
 import 'setup_screen.dart';
 import 'settings_screen.dart';
+import 'premium_screen.dart';
 
 class ThemeSelectionScreen extends StatelessWidget {
   const ThemeSelectionScreen({super.key});
@@ -37,22 +38,34 @@ class ThemeSelectionScreen extends StatelessWidget {
         ),
         itemCount: ThemeRepository.themes.length,
         itemBuilder: (context, index) {
+          final gameProvider = context.watch<GameProvider>();
           final theme = ThemeRepository.themes[index];
+          final bool isLocked = index > 0 && !gameProvider.isPremium;
+
           return Card(
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: InkWell(
               onTap: () {
-                context.read<GameProvider>().selectTheme(theme.id);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SetupScreen()),
-                );
+                if (isLocked) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PremiumScreen()),
+                  );
+                } else {
+                  context.read<GameProvider>().selectTheme(theme.id);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SetupScreen()),
+                  );
+                }
               },
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [theme.primaryColor.withOpacity(0.8), theme.primaryColor.withOpacity(0.4)],
+                    colors: isLocked 
+                        ? [Colors.grey.shade900, Colors.grey.shade800]
+                        : [theme.primaryColor.withOpacity(0.8), theme.primaryColor.withOpacity(0.4)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -66,7 +79,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                         child: Icon(
                           theme.icon,
                           size: 48,
-                          color: theme.accentColor,
+                          color: isLocked ? Colors.white24 : theme.accentColor,
                         ),
                       ),
                     ),
@@ -97,9 +110,13 @@ class ThemeSelectionScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: Icon(Icons.arrow_forward_ios, color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: Icon(
+                        isLocked ? Icons.lock : Icons.arrow_forward_ios,
+                        color: isLocked ? AppTheme.accentColor : Colors.white54,
+                        size: isLocked ? 20 : 16,
+                      ),
                     ),
                   ],
                 ),

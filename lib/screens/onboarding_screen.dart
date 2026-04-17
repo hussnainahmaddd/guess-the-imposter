@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'theme_selection_screen.dart';
+import 'premium_screen.dart';
+import '../providers/game_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -132,19 +136,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_currentPage < _pages.length - 1) {
                     _pageController.nextPage(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
                     );
                   } else {
+                    final gameProvider = context.read<GameProvider>();
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('onboarding_complete', true);
+                    
+                    if (!context.mounted) return;
+                    
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const ThemeSelectionScreen(),
                       ),
                     );
+                    
+                    if (!gameProvider.isPremium) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PremiumScreen(),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: Text(

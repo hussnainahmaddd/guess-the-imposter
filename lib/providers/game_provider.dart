@@ -1,16 +1,63 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import '../models/player.dart';
 import '../models/game_theme.dart';
 import '../data/topics.dart';
 import '../data/themes.dart';
+import '../services/purchase_service.dart';
 
 class GameProvider extends ChangeNotifier {
   final List<Player> _players = [];
   GameTheme _selectedTheme = ThemeRepository.themes[0];
+  final PurchaseService _purchaseService = PurchaseService();
+  bool _isPremium = false;
+  bool _isInitialized = false;
+
+  GameProvider() {
+    _initializeStore();
+  }
+
+  Future<void> _initializeStore() async {
+    _purchaseService.initialize();
+    await _purchaseService.fetchProducts();
+    _purchaseService.isPremium.addListener(_updatePremiumStatus);
+    _isPremium = _purchaseService.isPremium.value;
+    _isInitialized = true;
+    notifyListeners();
+  }
+
+  void _updatePremiumStatus() {
+    _isPremium = _purchaseService.isPremium.value;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _purchaseService.isPremium.removeListener(_updatePremiumStatus);
+    _purchaseService.dispose();
+    super.dispose();
+  }
 
   List<Player> get players => List.unmodifiable(_players);
   GameTheme get selectedTheme => _selectedTheme;
+  bool get isPremium => _isPremium;
+  bool get isInitialized => _isInitialized;
+  ProductDetails? get monthlyProduct => _purchaseService.monthlyProduct;
+
+  Future<void> buySubscription() async {
+    await _purchaseService.buySubscription();
+  }
+
+  Future<void> restorePurchases() async {
+    await _purchaseService.restorePurchases();
+  }
+
+  void togglePremium() {
+    // Keep for testing, but ideally this would hit the real service
+    _isPremium = !_isPremium;
+    notifyListeners();
+  }
   
   // Basic validation: min 3 players
   bool get isValidToStart => _players.length >= 3;

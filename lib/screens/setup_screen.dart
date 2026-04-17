@@ -76,17 +76,34 @@ class _SetupScreenState extends State<SetupScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppTheme.primaryColor,
-                          backgroundImage: player.avatarPath != null 
-                            ? AssetImage(player.avatarPath!) 
-                            : null,
-                          child: player.avatarPath == null 
-                            ? Text(
-                                player.name[0].toUpperCase(),
-                                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                              )
-                            : null,
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: player.avatarPath != null
+                              ? Transform.scale(
+                                  scale: 1.6, // Zoom in to hide theme headers at the top
+                                  alignment: const Alignment(0, 0.5), // Focus on the character (center-bottom)
+                                  child: Image.asset(
+                                    player.avatarPath!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    player.name[0].toUpperCase(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                ),
                         ),
                         title: Text(
                           player.name,

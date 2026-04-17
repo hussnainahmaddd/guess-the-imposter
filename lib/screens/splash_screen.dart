@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
+import 'premium_screen.dart';
+import 'theme_selection_screen.dart';
 import '../theme/app_theme.dart';
 import '../services/update_service.dart';
+import '../providers/game_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -52,11 +57,39 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       // Show blocking dialog
       _showUpdateDialog(updateData['store_url']);
     } else {
-      // Proceed normally
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+      
+      if (!mounted) return;
+      
+      final gameProvider = context.read<GameProvider>();
+      // Wait for initialization if needed
+      while (!gameProvider.isInitialized) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
+      if (!mounted) return;
+
+      if (!onboardingComplete) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        );
+      } else {
+        // Onboarding complete, go to game
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ThemeSelectionScreen()),
+        );
+        
+        // If not premium, show the paywall on top
+        if (!gameProvider.isPremium) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PremiumScreen()),
+          );
+        }
+      }
     }
   }
 
